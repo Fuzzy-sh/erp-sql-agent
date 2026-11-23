@@ -1,0 +1,101 @@
+[A] q01 easy         ✓    3.6s  How many customers do we have?
+[A] q02 easy         ✓    3.0s  List the suppliers based in Canada.
+[A] q03 easy         ✓    4.0s  How many sales orders are still open?
+[A] q04 easy         ✓    5.4s  What is the list price of the Feed wagon FW-300?
+[A] q05 easy         ✓    4.7s  Which supplier has the longest lead time?
+[A] q06 easy         ✓    4.2s  How many work orders are on hold?
+[A] q07 medium       ✓    4.4s  How many units of part PI-1007 do we have on hand across all warehouse
+[A] q08 medium       ✗    6.4s  Which parts are below their reorder point, counting available stock (o
+        sql: SELECT p."part_id",
+       p."part_number",
+       p."description",
+       p."reorder_point",
+       COALESCE(SUM(i."qty_on_hand" - i."qty_allocated"), 0) AS "available_qty"
+FROM parts p
+LEFT JOIN inventory i ON i."part_id" = p."part_id"
+GROUP BY p."part_id", p."part_number", p."description", p."reorder_point"
+HAVING COALESCE(SUM(i."qty_on_hand" - i."qty_allocated"), 0) < p."reorder_point"
+ORDER BY (p."reorder_point" - COALESCE(SUM(i."qty_on_hand" - i."qty_allocated"), 0)) DESC
+LIMIT 5;
+        got: "[(3, 'PI-1003', 'Angle iron 2in', 250, 115), (2, 'PI-1002', 'Steel tube 3in', 300, 172), (15, 'PI-1015', 'Paint, implement red (L)', 120, 95), (7, 'PI-1007', 'Gearbox 540rpm', 20, 8), (19, 'PI-1019', "
+[A] q09 medium       ✓    5.9s  How many customers do we have in each province?
+[A] q10 medium       ✓    5.6s  What is the total value of all purchase orders placed with Midwest Hyd
+[A] q11 medium       ✓    8.2s  Which purchase orders are partially received? Give their numbers.
+[A] q12 medium       ✓    8.1s  How many units of each finished good have we sold on shipped orders?
+[A] q13 medium       ✓    5.1s  Which work orders are due in October 2026 and not complete?
+[A] q14 medium       ✓    8.3s  What is the average lead time of our suppliers, by country?
+[A] q15 hard         ✓    4.8s  What was our total sales revenue from shipped orders, in CAD?
+[A] q16 hard         ✓    6.4s  Who are our top 3 customers by revenue on shipped orders?
+[A] q17 hard         ✓   10.0s  For parts below their reorder point (available stock across warehouses
+[A] q18 hard         ✓    8.0s  How many units are still to be received on open or partially received 
+[A] q19 hard         ✓    6.5s  Which province brought in the most revenue from shipped orders?
+[A] q20 hard         ✓    6.8s  What is the gross margin per unit (list price minus unit cost) for eac
+[A] q21 hard         ✓    5.9s  On average, how many days did shipped orders take from order date to s
+[A] q22 hard         ✓   10.4s  On orders that were not cancelled, do dealers or direct farms pay a lo
+[A] q23 unanswerable ✗    6.4s  What is the phone number of Midwest Hydraulics?
+        sql: SELECT "supplier_id", "name", "country", "lead_time_days" FROM suppliers WHERE "name" = 'Midwest Hydraulics' LIMIT 5;
+        got: "[(2, 'Midwest Hydraulics', 'USA', 21)]"
+[A] q24 unanswerable ✗    6.8s  Which sales rep handled the most orders?
+        sql: SELECT 'No sales rep column exists in the schema, so this question cannot be answered' AS message;
+        got: "[('No sales rep column exists in the schema, so this question cannot be answered',)]"
+[A] q25 unanswerable ✗    6.5s  How many hours of labour did work order 5 take?
+        sql: SELECT 'No valid query: no table or column in the schema records labour hours' AS message;
+        got: "[('No valid query: no table or column in the schema records labour hours',)]"
+[B] q01 easy         ✓    4.9s  How many customers do we have?
+[B] q02 easy         ✓    5.8s  List the suppliers based in Canada.
+[B] q03 easy         ✓    4.8s  How many sales orders are still open?
+[B] q04 easy         ✓    5.5s  What is the list price of the Feed wagon FW-300?
+[B] q05 easy         ✓    4.9s  Which supplier has the longest lead time?
+[B] q06 easy         ✓    3.6s  How many work orders are on hold?
+[B] q07 medium       ✓    5.3s  How many units of part PI-1007 do we have on hand across all warehouse
+[B] q08 medium       ✓    5.4s  Which parts are below their reorder point, counting available stock (o
+[B] q09 medium       ✓    8.1s  How many customers do we have in each province?
+[B] q10 medium       ✓    5.5s  What is the total value of all purchase orders placed with Midwest Hyd
+[B] q11 medium       ✓    7.6s  Which purchase orders are partially received? Give their numbers.
+[B] q12 medium       ✓    8.1s  How many units of each finished good have we sold on shipped orders?
+[B] q13 medium       ✓    6.3s  Which work orders are due in October 2026 and not complete?
+[B] q14 medium       ✓    6.2s  What is the average lead time of our suppliers, by country?
+[B] q15 hard         ✓    8.3s  What was our total sales revenue from shipped orders, in CAD?
+[B] q16 hard         ✓    5.8s  Who are our top 3 customers by revenue on shipped orders?
+[B] q17 hard         ✓    8.9s  For parts below their reorder point (available stock across warehouses
+[B] q18 hard         ✓    8.8s  How many units are still to be received on open or partially received 
+[B] q19 hard         ✓    6.2s  Which province brought in the most revenue from shipped orders?
+[B] q20 hard         ✓    9.3s  What is the gross margin per unit (list price minus unit cost) for eac
+[B] q21 hard         ✓    5.2s  On average, how many days did shipped orders take from order date to s
+[B] q22 hard         ✓   12.3s  On orders that were not cancelled, do dealers or direct farms pay a lo
+[B] q23 unanswerable ✓    5.3s  What is the phone number of Midwest Hydraulics?
+[B] q24 unanswerable ✓    7.5s  Which sales rep handled the most orders?
+[B] q25 unanswerable ✓    6.0s  How many hours of labour did work order 5 take?
+[C] q01 easy         ✓    4.6s  How many customers do we have?
+[C] q02 easy         ✓    5.3s  List the suppliers based in Canada.
+[C] q03 easy         ✓    4.6s  How many sales orders are still open?
+[C] q04 easy         ✓    5.3s  What is the list price of the Feed wagon FW-300?
+[C] q05 easy         ✓    3.3s  Which supplier has the longest lead time?
+[C] q06 easy         ✓    5.5s  How many work orders are on hold?
+[C] q07 medium       ✓    4.1s  How many units of part PI-1007 do we have on hand across all warehouse
+[C] q08 medium       ✓    7.0s  Which parts are below their reorder point, counting available stock (o
+[C] q09 medium       ✓    5.2s  How many customers do we have in each province?
+[C] q10 medium       ✓    7.5s  What is the total value of all purchase orders placed with Midwest Hyd
+[C] q11 medium       ✓    5.5s  Which purchase orders are partially received? Give their numbers.
+[C] q12 medium       ✓    6.3s  How many units of each finished good have we sold on shipped orders?
+[C] q13 medium       ✓    5.7s  Which work orders are due in October 2026 and not complete?
+[C] q14 medium       ✓    6.5s  What is the average lead time of our suppliers, by country?
+[C] q15 hard         ✓    5.2s  What was our total sales revenue from shipped orders, in CAD?
+[C] q16 hard         ✓    5.7s  Who are our top 3 customers by revenue on shipped orders?
+[C] q17 hard         ✓    7.9s  For parts below their reorder point (available stock across warehouses
+[C] q18 hard         ✓    7.7s  How many units are still to be received on open or partially received 
+[C] q19 hard         ✓    4.1s  Which province brought in the most revenue from shipped orders?
+[C] q20 hard         ✓    7.6s  What is the gross margin per unit (list price minus unit cost) for eac
+[C] q21 hard         ✓    4.8s  On average, how many days did shipped orders take from order date to s
+[C] q22 hard         ✓    9.8s  On orders that were not cancelled, do dealers or direct farms pay a lo
+[C] q23 unanswerable ✓    3.9s  What is the phone number of Midwest Hydraulics?
+[C] q24 unanswerable ✓    7.0s  Which sales rep handled the most orders?
+[C] q25 unanswerable ✓    8.8s  How many hours of labour did work order 5 take?
+
+=== Summary ===
+version       correct %  invented %  no answer   avg s  avg tokens
+A                  84.0         0.0          0     6.2           0
+B                 100.0         2.9          0     6.6        7011
+C                 100.0         0.0          0     6.0        5579
+
+By difficulty: {"easy": {"A": "6/6", "B": "6/6", "C": "6/6"}, "medium": {"A": "7/8", "B": "8/8", "C": "8/8"}, "hard": {"A": "8/8", "B": "8/8", "C": "8/8"}, "unanswerable": {"A": "0/3", "B": "3/3", "C": "3/3"}}

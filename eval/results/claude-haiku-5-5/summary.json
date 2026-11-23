@@ -1,0 +1,44 @@
+{
+  "summary": {
+    "A": {
+      "correct_%": 64.0,
+      "invented_query_%": 0.0,
+      "no_answer": 0,
+      "avg_seconds": 4.3,
+      "avg_tokens": 0,
+      "by_level": {
+        "easy": "6/6",
+        "medium": "6/8",
+        "hard": "4/8",
+        "unanswerable": "0/3"
+      }
+    },
+    "B": {
+      "correct_%": 100.0,
+      "invented_query_%": 0.0,
+      "no_answer": 0,
+      "avg_seconds": 4.8,
+      "avg_tokens": 7425,
+      "by_level": {
+        "easy": "6/6",
+        "medium": "8/8",
+        "hard": "8/8",
+        "unanswerable": "3/3"
+      }
+    },
+    "C": {
+      "correct_%": 100.0,
+      "invented_query_%": 0.0,
+      "no_answer": 0,
+      "avg_seconds": 4.2,
+      "avg_tokens": 5876,
+      "by_level": {
+        "easy": "6/6",
+        "medium": "8/8",
+        "hard": "8/8",
+        "unanswerable": "3/3"
+      }
+    }
+  },
+  "note": "re-scored with final rules (number words, A refusal messages, sqlite_master not counted as invented)"
+}

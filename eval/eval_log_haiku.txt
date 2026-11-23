@@ -1,0 +1,141 @@
+Model: claude-haiku-5-5  ->  eval/results/claude-haiku-5-5
+[A] q01 easy         ✓    2.6s  How many customers do we have?
+[A] q02 easy         ✓    2.5s  List the suppliers based in Canada.
+[A] q03 easy         ✓    4.0s  How many sales orders are still open?
+[A] q04 easy         ✓    4.0s  What is the list price of the Feed wagon FW-300?
+[A] q05 easy         ✓    3.9s  Which supplier has the longest lead time?
+[A] q06 easy         ✓    3.4s  How many work orders are on hold?
+[A] q07 medium       ✓    3.1s  How many units of part PI-1007 do we have on hand across all warehouse
+[A] q08 medium       ✗    5.5s  Which parts are below their reorder point, counting available stock (o
+        sql: SELECT p."part_id", p."part_number", p."description", p."reorder_point", COALESCE(SUM(i."qty_on_hand" - i."qty_allocated"), 0) AS "available_qty" FROM parts p LEFT JOIN inventory i ON p."part_id" = i."part_id" GROUP BY p."part_id", p."part_number", p."description", p."reorder_point" HAVING COALESCE(SUM(i."qty_on_hand" - i."qty_allocated"), 0) < p."reorder_point" ORDER BY "available_qty" ASC LIMIT 5;
+        got: "[(19, 'PI-1019', 'Post pounder PP-200', 3, 1), (20, 'PI-1020', 'Rock picker RP-12', 3, 2), (7, 'PI-1007', 'Gearbox 540rpm', 20, 8), (15, 'PI-1015', 'Paint, implement red (L)', 120, 95), (3, 'PI-1003',"
+[A] q09 medium       ✓    2.2s  How many customers do we have in each province?
+[A] q10 medium       ✓    4.1s  What is the total value of all purchase orders placed with Midwest Hyd
+[A] q11 medium       ✗    4.7s  Which purchase orders are partially received? Give their numbers.
+        sql: SELECT "po_id" FROM "po_lines" GROUP BY "po_id" HAVING SUM("qty_received") > 0 AND SUM("qty_received") < SUM("qty_ordered") ORDER BY "po_id" LIMIT 5;
+        got: '[(4,), (12,), (18,), (19,), (24,)]'
+[A] q12 medium       ✓    5.6s  How many units of each finished good have we sold on shipped orders?
+[A] q13 medium       ✓    3.4s  Which work orders are due in October 2026 and not complete?
+[A] q14 medium       ✓    3.8s  What is the average lead time of our suppliers, by country?
+[A] q15 hard         ✓    4.7s  What was our total sales revenue from shipped orders, in CAD?
+[A] q16 hard         ✓    4.1s  Who are our top 3 customers by revenue on shipped orders?
+[A] q17 hard         ✗    6.2s  For parts below their reorder point (available stock across warehouses
+        sql: SELECT p."part_id",
+       p."description",
+       s."name" AS "supplier_name",
+       SUM(i."qty_on_hand" - i."qty_allocated") AS "available_qty",
+       p."reorder_point"
+FROM parts p
+JOIN inventory i ON i."part_id" = p."part_id"
+LEFT JOIN suppliers s ON s."supplier_id" = p."supplier_id"
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM work_orders w
+    WHERE w."part_id" = p."part_id"
+)
+GROUP BY p."part_id", p."description", s."name", p."reorder_point"
+HAVING SUM(i."qty_on_hand" - i."qty_allocated") < p."reorder_point"
+ORDER BY "available_qty" ASC
+LIMIT 5;
+        got: "[(7, 'Gearbox 540rpm', 'Hansa Antriebstechnik', 8, 20), (15, 'Paint, implement red (L)', 'Alberta Steel Supply', 95, 120), (3, 'Angle iron 2in', 'Alberta Steel Supply', 115, 250), (2, 'Steel tube 3in'"
+[A] q18 hard         ✗    6.2s  How many units are still to be received on open or partially received 
+        sql: SELECT p."part_number", SUM(pl."qty_ordered" - pl."qty_received") AS "units_outstanding" FROM po_lines pl JOIN purchase_orders po ON pl."po_id" = po."po_id" JOIN parts p ON pl."part_id" = p."part_id" WHERE po."status" IN ('Open', 'Partially Received') GROUP BY p."part_number" ORDER BY "units_outstanding" DESC LIMIT 5;
+        got: "[('PI-1004', 375), ('PI-1005', 353), ('PI-1015', 301), ('PI-1003', 229), ('PI-1013', 227)]"
+[A] q19 hard         ✓    3.9s  Which province brought in the most revenue from shipped orders?
+[A] q20 hard         ✗    5.7s  What is the gross margin per unit (list price minus unit cost) for eac
+        sql: ```sql
+SELECT "part_id",
+       "description",
+       "list_price",
+       "unit_cost",
+       ("list_price" - "unit_cost") AS "gross_margin_per_unit"
+FROM "parts"
+WHERE "category" = 'Finished good'
+  AND "list_price" IS NOT NULL
+ORDER BY "gross_margin_per_unit" DESC;
+```
+        got: 'OperationalError: near "```sql\nSELECT "part_id",\n       "description",\n       "list_price",\n       "unit_cost",\n       ("list_price" - "unit_cost") AS "gross_margin_per_unit"\nFROM "parts"\nWHERE "categ'
+[A] q21 hard         ✓    3.5s  On average, how many days did shipped orders take from order date to s
+[A] q22 hard         ✗    5.4s  On orders that were not cancelled, do dealers or direct farms pay a lo
+        sql: ```sql
+SELECT c."segment",
+       AVG(sl."unit_price") AS "avg_unit_price"
+FROM so_lines AS sl
+JOIN sales_orders AS so ON sl."so_id" = so."so_id"
+JOIN customers AS c ON so."customer_id" = c."customer_id"
+JOIN parts AS p ON sl."part_id" = p."part_id"
+WHERE p."part_number" = 'BP-500'
+  AND so."status" <> 'Cancelled'
+  AND c."segment" IN ('Dealer', 'Direct farm')
+GROUP BY c."segment";
+```
+        got: 'OperationalError: near "```sql\nSELECT c."segment",\n       AVG(sl."unit_price") AS "avg_unit_price"\nFROM so_lines AS sl\nJOIN sales_orders AS so ON sl."so_id" = so."so_id"\nJOIN customers AS c ON so."cus'
+[A] q23 unanswerable ✗    4.6s  What is the phone number of Midwest Hydraulics?
+        sql: SELECT "supplier_id", "name", "country", "lead_time_days" FROM "suppliers" WHERE "name" = 'Midwest Hydraulics' LIMIT 5;
+        got: "[(2, 'Midwest Hydraulics', 'USA', 21)]"
+[A] q24 unanswerable ✗    4.8s  Which sales rep handled the most orders?
+        sql: SELECT c.customer_id, c.name, COUNT(s.so_id) AS order_count FROM sales_orders AS s JOIN customers AS c ON s.customer_id = c.customer_id GROUP BY c.customer_id, c.name ORDER BY order_count DESC LIMIT 1;
+        got: "[(5, 'Big Sky Ag Equipment 5', 8)]"
+[A] q25 unanswerable ✗    4.4s  How many hours of labour did work order 5 take?
+        sql: SELECT "wo_id", "part_id", "qty", "start_date", "due_date", "status" FROM "work_orders" WHERE "wo_id" = 5;
+        got: "[(5, 20, 10, '2026-04-16', '2026-04-30', 'Complete')]"
+[B] q01 easy         ✓    3.0s  How many customers do we have?
+[B] q02 easy         ✓    3.7s  List the suppliers based in Canada.
+[B] q03 easy         ✓    3.7s  How many sales orders are still open?
+[B] q04 easy         ✓    4.4s  What is the list price of the Feed wagon FW-300?
+[B] q05 easy         ✓    3.8s  Which supplier has the longest lead time?
+[B] q06 easy         ✗    3.2s  How many work orders are on hold?
+        sql: SELECT status, COUNT(*) AS cnt FROM work_orders GROUP BY status
+        got: 'Three work orders are on hold.'
+[B] q07 medium       ✓    3.8s  How many units of part PI-1007 do we have on hand across all warehouse
+[B] q08 medium       ✓    5.9s  Which parts are below their reorder point, counting available stock (o
+[B] q09 medium       ✓    4.3s  How many customers do we have in each province?
+[B] q10 medium       ✓    3.6s  What is the total value of all purchase orders placed with Midwest Hyd
+[B] q11 medium       ✓    6.0s  Which purchase orders are partially received? Give their numbers.
+[B] q12 medium       ✓    4.8s  How many units of each finished good have we sold on shipped orders?
+[B] q13 medium       ✓    4.4s  Which work orders are due in October 2026 and not complete?
+[B] q14 medium       ✓    3.4s  What is the average lead time of our suppliers, by country?
+[B] q15 hard         ✓    5.9s  What was our total sales revenue from shipped orders, in CAD?
+[B] q16 hard         ✓    4.6s  Who are our top 3 customers by revenue on shipped orders?
+[B] q17 hard         ✓    8.1s  For parts below their reorder point (available stock across warehouses
+[B] q18 hard         ✓    5.6s  How many units are still to be received on open or partially received 
+[B] q19 hard         ✓    5.0s  Which province brought in the most revenue from shipped orders?
+[B] q20 hard         ✓    4.2s  What is the gross margin per unit (list price minus unit cost) for eac
+[B] q21 hard         ✓    3.8s  On average, how many days did shipped orders take from order date to s
+[B] q22 hard         ✓   10.4s  On orders that were not cancelled, do dealers or direct farms pay a lo
+[B] q23 unanswerable ✓    3.4s  What is the phone number of Midwest Hydraulics?
+[B] q24 unanswerable ✓    5.4s  Which sales rep handled the most orders?
+[B] q25 unanswerable ✓    5.2s  How many hours of labour did work order 5 take?
+[C] q01 easy         ✓    3.3s  How many customers do we have?
+[C] q02 easy         ✓    3.6s  List the suppliers based in Canada.
+[C] q03 easy         ✓    3.5s  How many sales orders are still open?
+[C] q04 easy         ✓    3.4s  What is the list price of the Feed wagon FW-300?
+[C] q05 easy         ✓    3.7s  Which supplier has the longest lead time?
+[C] q06 easy         ✓    3.2s  How many work orders are on hold?
+[C] q07 medium       ✓    4.1s  How many units of part PI-1007 do we have on hand across all warehouse
+[C] q08 medium       ✓    6.3s  Which parts are below their reorder point, counting available stock (o
+[C] q09 medium       ✓    3.8s  How many customers do we have in each province?
+[C] q10 medium       ✓    5.2s  What is the total value of all purchase orders placed with Midwest Hyd
+[C] q11 medium       ✓    3.9s  Which purchase orders are partially received? Give their numbers.
+[C] q12 medium       ✓    3.9s  How many units of each finished good have we sold on shipped orders?
+[C] q13 medium       ✓    3.4s  Which work orders are due in October 2026 and not complete?
+[C] q14 medium       ✓    3.6s  What is the average lead time of our suppliers, by country?
+[C] q15 hard         ✓    4.4s  What was our total sales revenue from shipped orders, in CAD?
+[C] q16 hard         ✓    4.5s  Who are our top 3 customers by revenue on shipped orders?
+[C] q17 hard         ✓    5.6s  For parts below their reorder point (available stock across warehouses
+[C] q18 hard         ✓    5.2s  How many units are still to be received on open or partially received 
+[C] q19 hard         ✓    4.0s  Which province brought in the most revenue from shipped orders?
+[C] q20 hard         ✓    4.2s  What is the gross margin per unit (list price minus unit cost) for eac
+[C] q21 hard         ✓    3.4s  On average, how many days did shipped orders take from order date to s
+[C] q22 hard         ✓    5.6s  On orders that were not cancelled, do dealers or direct farms pay a lo
+[C] q23 unanswerable ✓    3.6s  What is the phone number of Midwest Hydraulics?
+[C] q24 unanswerable ✓    5.0s  Which sales rep handled the most orders?
+[C] q25 unanswerable ✓    5.1s  How many hours of labour did work order 5 take?
+
+=== Summary ===
+version       correct %  invented %  no answer   avg s  avg tokens
+A                  64.0         0.0          0     4.3           0
+B                  96.0         0.0          0     4.8        7425
+C                 100.0         0.0          0     4.2        5876
+
+By difficulty: {"easy": {"A": "6/6", "B": "5/6", "C": "6/6"}, "medium": {"A": "6/8", "B": "8/8", "C": "8/8"}, "hard": {"A": "4/8", "B": "8/8", "C": "8/8"}, "unanswerable": {"A": "0/3", "B": "3/3", "C": "3/3"}}

@@ -1,0 +1,93 @@
+{
+  "customers": {
+    "description": "Dealers and farms that buy from us.",
+    "columns": {
+      "customer_id": "Unique customer number.",
+      "name": "Customer (dealer or farm) name.",
+      "province": "Canadian province code, e.g. AB, SK, MB.",
+      "segment": "Customer type: 'Dealer' or 'Direct farm'."
+    }
+  },
+  "suppliers": {
+    "description": "Companies we buy parts and raw material from.",
+    "columns": {
+      "supplier_id": "Unique supplier number.",
+      "name": "Supplier name.",
+      "country": "Supplier country: 'Canada', 'USA' or 'Germany'.",
+      "lead_time_days": "Typical days from order to delivery."
+    }
+  },
+  "parts": {
+    "description": "Every item we buy, make or sell. Finished machines are parts with category 'Finished good'.",
+    "columns": {
+      "part_id": "Internal part number (use for joins).",
+      "part_number": "Part number printed on labels, e.g. 'PI-1001'.",
+      "description": "What the part is.",
+      "category": "'Raw material', 'Component', 'Hydraulics', 'Electrical' or 'Finished good'.",
+      "unit_cost": "Standard cost per unit in CAD.",
+      "list_price": "Selling price per unit in CAD. Only set for finished goods.",
+      "supplier_id": "Main supplier. NULL for parts we make ourselves.",
+      "reorder_point": "Reorder when total available stock falls below this."
+    }
+  },
+  "inventory": {
+    "description": "Stock per part per warehouse.",
+    "columns": {
+      "part_id": "The part.",
+      "warehouse": "Warehouse: 'Main plant' or 'Parts depot'.",
+      "qty_on_hand": "Units physically in the warehouse.",
+      "qty_allocated": "Units already promised to orders. Available = qty_on_hand - qty_allocated."
+    }
+  },
+  "purchase_orders": {
+    "description": "Orders we place with suppliers (header).",
+    "columns": {
+      "po_id": "Purchase order number.",
+      "supplier_id": "Supplier ordered from.",
+      "order_date": "Date ordered, ISO format YYYY-MM-DD.",
+      "status": "'Open', 'Partially received', 'Received' or 'Cancelled'."
+    }
+  },
+  "po_lines": {
+    "description": "Lines of a purchase order: which part, how many.",
+    "columns": {
+      "po_id": "The purchase order.",
+      "line_no": "Line number within the order.",
+      "part_id": "Part ordered.",
+      "qty_ordered": "Units ordered.",
+      "qty_received": "Units received so far.",
+      "unit_price": "Price per unit in CAD on this order."
+    }
+  },
+  "work_orders": {
+    "description": "Production jobs: build a quantity of a finished good.",
+    "columns": {
+      "wo_id": "Work order number.",
+      "part_id": "Finished good being built.",
+      "qty": "Units to build.",
+      "start_date": "Planned start, YYYY-MM-DD.",
+      "due_date": "Planned finish, YYYY-MM-DD.",
+      "status": "'Planned', 'In progress', 'Complete' or 'On hold'."
+    }
+  },
+  "sales_orders": {
+    "description": "Orders customers place with us (header).",
+    "columns": {
+      "so_id": "Sales order number.",
+      "customer_id": "Customer who ordered.",
+      "order_date": "Date ordered, YYYY-MM-DD.",
+      "ship_date": "Date shipped, YYYY-MM-DD. NULL if not shipped yet.",
+      "status": "'Open', 'Shipped' or 'Cancelled'."
+    }
+  },
+  "so_lines": {
+    "description": "Lines of a sales order: which machine, how many, at what price.",
+    "columns": {
+      "so_id": "The sales order.",
+      "line_no": "Line number within the order.",
+      "part_id": "Finished good sold.",
+      "qty": "Units sold.",
+      "unit_price": "Selling price per unit in CAD on this order."
+    }
+  }
+}
