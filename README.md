@@ -89,7 +89,7 @@ eval/questions.jsonl      25 questions with gold SQL
 eval/run_eval.py          scoring + summary
 mcp_server.py             MCP server exposing the grounded tools
 tests/test_validator.py   offline validator tests
-notebooks/                walkthrough notebook (+ the script that builds it)
+notebooks/                walkthrough notebook
 ```
 
 Built while working through *AI Agents and Applications: With LangChain, LangGraph, and MCP*
