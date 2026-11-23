@@ -4,6 +4,10 @@ Ask a manufacturing ERP database questions in plain English. The agent reads the
 **real schema and a data dictionary** before writing SQL, and **every query is validated
 with code** before it runs. A 25-question test set measures whether the answers are right.
 
+**📓 Start here:** [`notebooks/01_erp_sql_walkthrough.ipynb`](notebooks/01_erp_sql_walkthrough.ipynb)
+walks through it with real outputs: the database and data dictionary, the validator on six queries,
+one question answered by all three versions, an unanswerable question, a raw MCP session, and the evaluation.
+
 The database is **synthetic**: a fictional implement manufacturer, "Prairie Implements",
 with 9 tables (parts, inventory, suppliers, purchase orders, work orders, customers, sales orders and order lines).
 
@@ -85,6 +89,7 @@ eval/questions.jsonl      25 questions with gold SQL
 eval/run_eval.py          scoring + summary
 mcp_server.py             MCP server exposing the grounded tools
 tests/test_validator.py   offline validator tests
+notebooks/                walkthrough notebook (+ the script that builds it)
 ```
 
 Built while working through *AI Agents and Applications: With LangChain, LangGraph, and MCP*
